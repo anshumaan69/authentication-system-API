@@ -1,15 +1,40 @@
-# Dependencies
-/node_modules
+# Node modules in server folder
+/server/node_modules/
 
 # Environment variables
-.env
+/server/.env
+/server/.env.local
+/server/.env.*.local
 
-# Optional: Operating System generated files
+# Logs
+/server/logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS generated files
 .DS_Store
 Thumbs.db
 
-# Optional: IDE/Editor specific files
+# IDE/editor configs
 .vscode/
 .idea/
 *.swp
 *.swo
+
+# Coverage reports
+/server/coverage/
+*.lcov
+
+# Optional: Build output
+/server/dist/
+/server/build/
+tmp/
+temp/
+
+# Optional: PM2 or log files
+/server/pids
+*.pid
+*.seed
+*.pid.lock
