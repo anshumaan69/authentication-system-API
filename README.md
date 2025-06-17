@@ -1,3 +1,3 @@
 A simple authentication api having features like login,logout and register
-Email verification and forgot password feature will be added soon
-NO AI USED
+Now u can send a registration mail to the user 
+SOON TO BE ADDED FEATURES: OTP verification and forget password
