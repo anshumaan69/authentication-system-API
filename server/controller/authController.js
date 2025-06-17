@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import userModel from '../models/userModel.js';
+import transporter from '../config/nodeMailer.js';
 
 
 
@@ -33,6 +34,15 @@ export const register = async(req,res)=>{
             maxAge:7*24*60*60*1000
 
         })
+
+        const mailOptions={
+            from:process.env.SMTP_EMAIL,
+            to:email,
+            subject:"Welcome to the Authentication app",
+            text:`Welcome to the authentication app website.Your account has been created with the email id :${email}  `
+
+        }
+        await transporter.sendMail(mailOptions)
         return res.json({success:true})
     } catch (error) {
         res.json({success:false , message :error.message})
