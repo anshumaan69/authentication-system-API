@@ -52,8 +52,7 @@ export const register = async(req,res)=>{
 
 
 
-
-
+//Login logic
 export const login = async(req,res)=>{
     const {email,password}=req.body;
 
@@ -118,3 +117,64 @@ export const logout= (req,res)=>{
         
     }
 }
+
+//Email verififcation
+export const verifyOtp = async (req,res)=>{
+    try {
+        const {userId} = req.body;
+        const user = await userModel.findById(userId);
+        if(user.isAccountVerified){
+            return res.json({success:false , message:"account already verified"})
+        }
+        const otp = String(Math.floor(100000+Math.random()*900000));
+        user.verifyOtp=otp;
+        //1 day expiry
+        user.verifyOtpExpireAt=Date.now()+24*60*60*1000;
+
+        await user.save()
+        const mailOptions={
+            from:process.env.SMTP_EMAIL,
+            to:user.email,
+            subject:"Account verification OTP",
+            text:`The verification atp for your account ${user.email} is ${otp}  `
+
+        }
+        await transporter.sendMail(mailOptions)
+        return res.json({success:true,message:"Verification otp sent on mail"})
+    } catch (error) {
+        return res.json({success:false , message : error.message})        
+    }
+}
+
+//Checking if emailotp == generated otp
+export const emailverification = async(req,res)=>{
+    const {userId, otp}= req.body; // email is not needed here
+    if(!userId || !otp){
+        return res.json({success:false,message:"Missing details"})
+    }
+    try {
+        const user = await userModel.findById(userId); // <-- fix here
+        if(!user){
+            return res.json({success:false,message:"User not found"})
+        }
+        if (user.verifyOtp === '' || user.verifyOtp != otp){
+            return res.json({success:false,message:"Invalid Otp"})
+        }
+        if(user.verifyOtpExpireAt < Date.now()){
+            return res.json({success:false,message:"Expired OTP"});
+        }
+        user.isAccountVerified = true;
+        user.verifyOtp = '';
+        user.verifyOtpExpireAt = 0;
+        await user.save();
+        return res.json({success:true,message:"Email is verified"})
+    } catch (error) {
+        return res.json({success:false,message:error.message})
+    }
+}
+
+
+//At many places we are getting the userID but how is the user going to send the userID when he is only enetering the OTP
+//The answer :token which is stored COOKIES
+//Now we need a middleware that will get the cookie and from that cookie ....from that cookie it will find the token....
+//from that token it will find the userId and then that userID will be added in the req body
